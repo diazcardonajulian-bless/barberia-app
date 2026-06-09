@@ -32,21 +32,45 @@ export default function Dashboard() {
     setToasts(prev => prev.filter(t => t.id !== id))
   }
 
+  const loadData = async () => {
+    setLoading(true)
+    const startOfDay = `${selectedDate}T00:00:00`
+    const endOfDay = `${selectedDate}T23:59:59`
+
+    const { data: appts } = await supabase
+      .from('appointments')
+      .select('*, barbers(name), services(name, duration_min), clients(name, phone)')
+      .gte('starts_at', startOfDay)
+      .lte('starts_at', endOfDay)
+      .order('starts_at')
+
+    setAppointments(appts || [])
+
+    const { data: barbersData } = await supabase
+      .from('barbers')
+      .select('*')
+      .order('name')
+
+    setBarbers(barbersData || [])
+
+    const { data: servicesData } = await supabase
+      .from('services')
+      .select('*')
+      .order('name')
+
+    setServices(servicesData || [])
+    setLoading(false)
+  }
+
   useEffect(() => {
-    console.log('Iniciando suscripción Realtime...')
-    
     const channel = supabase
       .channel('appointments-realtime')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'appointments' }, async (payload) => {
-        console.log('Evento INSERT recibido:', payload)
-        
-        const { data, error } = await supabase
+        const { data } = await supabase
           .from('appointments')
           .select('*, barbers(name), services(name), clients(name, phone)')
           .eq('id', payload.new.id)
           .single()
-
-        console.log('Datos de la cita:', { data, error })
 
         if (data) {
           const date = new Date(data.starts_at)
@@ -62,19 +86,15 @@ export default function Dashboard() {
 
         loadData()
       })
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'appointments' }, (payload) => {
-        console.log('Evento UPDATE recibido:', payload)
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'appointments' }, () => {
         loadData()
       })
-      .subscribe((status) => {
-        console.log('Estado de suscripción:', status)
-      })
+      .subscribe()
 
     return () => {
-      console.log('Cerrando suscripción Realtime')
       supabase.removeChannel(channel)
     }
-  }, [])
+  }, [selectedDate])
 
   useEffect(() => {
     const fetch = async () => {
@@ -108,36 +128,6 @@ export default function Dashboard() {
     }
     fetch()
   }, [selectedDate])
-
-  const loadData = async () => {
-    setLoading(true)
-    const startOfDay = `${selectedDate}T00:00:00`
-    const endOfDay = `${selectedDate}T23:59:59`
-
-    const { data: appts } = await supabase
-      .from('appointments')
-      .select('*, barbers(name), services(name, duration_min), clients(name, phone)')
-      .gte('starts_at', startOfDay)
-      .lte('starts_at', endOfDay)
-      .order('starts_at')
-
-    setAppointments(appts || [])
-
-    const { data: barbersData } = await supabase
-      .from('barbers')
-      .select('*')
-      .order('name')
-
-    setBarbers(barbersData || [])
-
-    const { data: servicesData } = await supabase
-      .from('services')
-      .select('*')
-      .order('name')
-
-    setServices(servicesData || [])
-    setLoading(false)
-  }
 
   const updateStatus = async (id, status) => {
     await supabase.from('appointments').update({ status }).eq('id', id)
