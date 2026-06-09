@@ -20,7 +20,7 @@ export default function Dashboard() {
   const [showAddBarber, setShowAddBarber] = useState(false)
   const [showAddService, setShowAddService] = useState(false)
   
-  const [barberForm, setBarberForm] = useState({ name: '', phone: '', is_active: true })
+  const [barberForm, setBarberForm] = useState({ name: '', phone: '', email: '', is_active: true })
   const [serviceForm, setServiceForm] = useState({ name: '', duration_min: 30, price: 0, is_active: true })
 
   const addToast = (toast) => {
@@ -142,7 +142,7 @@ export default function Dashboard() {
   const handleAddBarber = async (e) => {
     e.preventDefault()
     await supabase.from('barbers').insert(barberForm)
-    setBarberForm({ name: '', phone: '', is_active: true })
+    setBarberForm({ name: '', phone: '', email: '', is_active: true })
     setShowAddBarber(false)
     loadData()
   }
@@ -151,7 +151,7 @@ export default function Dashboard() {
     e.preventDefault()
     await supabase.from('barbers').update(barberForm).eq('id', editingBarber.id)
     setEditingBarber(null)
-    setBarberForm({ name: '', phone: '', is_active: true })
+    setBarberForm({ name: '', phone: '', email: '', is_active: true })
     loadData()
   }
 
@@ -185,7 +185,7 @@ export default function Dashboard() {
 
   const startEditBarber = (barber) => {
     setEditingBarber(barber)
-    setBarberForm({ name: barber.name, phone: barber.phone, is_active: barber.is_active })
+    setBarberForm({ name: barber.name, phone: barber.phone, email: barber.email || '', is_active: barber.is_active })
   }
 
   const startEditService = (service) => {
@@ -478,6 +478,13 @@ export default function Dashboard() {
                   required
                   style={inputStyle}
                 />
+                <input
+                  type="email"
+                  placeholder="Email (para notificaciones)"
+                  value={barberForm.email}
+                  onChange={e => setBarberForm({ ...barberForm, email: e.target.value })}
+                  style={inputStyle}
+                />
                 <label style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-secondary)' }}>
                   <input
                     type="checkbox"
@@ -518,6 +525,13 @@ export default function Dashboard() {
                   required
                   style={inputStyle}
                 />
+                <input
+                  type="email"
+                  placeholder="Email (para notificaciones)"
+                  value={barberForm.email}
+                  onChange={e => setBarberForm({ ...barberForm, email: e.target.value })}
+                  style={inputStyle}
+                />
                 <label style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-secondary)' }}>
                   <input
                     type="checkbox"
@@ -529,7 +543,7 @@ export default function Dashboard() {
               </div>
               <div style={{ display: 'flex', gap: 8 }}>
                 <button type="submit" style={buttonStyle('var(--success)')}>Actualizar</button>
-                <button type="button" onClick={() => { setEditingBarber(null); setBarberForm({ name: '', phone: '', is_active: true }) }} style={buttonStyle('var(--text-muted)')}>Cancelar</button>
+                <button type="button" onClick={() => { setEditingBarber(null); setBarberForm({ name: '', phone: '', email: '', is_active: true }) }} style={buttonStyle('var(--text-muted)')}>Cancelar</button>
               </div>
             </form>
           )}
@@ -546,6 +560,9 @@ export default function Dashboard() {
                   <div>
                     <div style={{ fontWeight: 600, fontSize: 16, marginBottom: 4 }}>{barber.name}</div>
                     <div style={{ color: 'var(--text-secondary)', fontSize: 14 }}>{barber.phone}</div>
+                    {barber.email && (
+                      <div style={{ color: 'var(--text-secondary)', fontSize: 14 }}>{barber.email}</div>
+                    )}
                   </div>
                   <span style={{
                     padding: '6px 14px',
