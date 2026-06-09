@@ -88,12 +88,12 @@ export default function Dashboard() {
 
   const getStatusColor = (status) => {
     const colors = {
-      pending: '#f59e0b',
-      confirmed: '#3b82f6',
-      completed: '#10b981',
-      cancelled: '#ef4444'
+      pending: 'var(--warning)',
+      confirmed: 'var(--info)',
+      completed: 'var(--success)',
+      cancelled: 'var(--error)'
     }
-    return colors[status] || '#666'
+    return colors[status] || 'var(--text-muted)'
   }
 
   const getStatusLabel = (status) => {
@@ -147,25 +147,48 @@ export default function Dashboard() {
 
   return (
     <div style={{ maxWidth: 1200, margin: '0 auto', padding: '20px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-        <h1 style={{ margin: 0 }}>Panel de Administración</h1>
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 32,
+        flexWrap: 'wrap',
+        gap: 16
+      }}>
+        <h1 style={{ margin: 0, fontSize: 'clamp(1.5rem, 4vw, 2.5rem)' }}>Panel de Administración</h1>
         <button onClick={handleLogout}
-          style={{ padding: '8px 16px', background: '#ef4444', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer' }}>
+          style={{
+            padding: '10px 20px',
+            background: 'var(--error)',
+            color: '#fff',
+            border: 'none',
+            borderRadius: 8,
+            cursor: 'pointer',
+            fontWeight: 500
+          }}>
           Cerrar sesión
         </button>
       </div>
 
-      <div style={{ display: 'flex', gap: 8, marginBottom: 24, borderBottom: '1px solid #e5e5e5' }}>
+      <div style={{
+        display: 'flex',
+        gap: 8,
+        marginBottom: 32,
+        borderBottom: '1px solid var(--border)',
+        overflowX: 'auto'
+      }}>
         {['appointments', 'barbers', 'services'].map(tab => (
           <button key={tab} onClick={() => setActiveTab(tab)}
             style={{
               padding: '12px 24px',
               background: 'none',
               border: 'none',
-              borderBottom: activeTab === tab ? '2px solid #1a1a1a' : '2px solid transparent',
+              borderBottom: activeTab === tab ? '2px solid var(--accent)' : '2px solid transparent',
               cursor: 'pointer',
               fontWeight: activeTab === tab ? 600 : 400,
-              color: activeTab === tab ? '#1a1a1a' : '#666'
+              color: activeTab === tab ? 'var(--accent)' : 'var(--text-secondary)',
+              whiteSpace: 'nowrap',
+              fontSize: 15
             }}>
             {tab === 'appointments' ? 'Citas' : tab === 'barbers' ? 'Barberos' : 'Servicios'}
           </button>
@@ -174,80 +197,148 @@ export default function Dashboard() {
 
       {activeTab === 'appointments' && (
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24 }}>
-            <label style={{ fontWeight: 500 }}>Fecha:</label>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 16,
+            marginBottom: 24,
+            flexWrap: 'wrap'
+          }}>
+            <label style={{ fontWeight: 500, color: 'var(--text-secondary)' }}>Fecha:</label>
             <input type="date" value={selectedDate} onChange={e => setSelectedDate(e.target.value)}
-              style={{ padding: '8px 12px', borderRadius: 6, border: '1px solid #e5e5e5' }} />
+              style={{
+                padding: '10px 14px',
+                background: 'var(--surface)',
+                border: '1px solid var(--border)',
+                borderRadius: 8,
+                color: 'var(--text)',
+                fontSize: 14
+              }} />
           </div>
 
           {loading ? (
-            <p>Cargando...</p>
+            <p style={{ color: 'var(--text-secondary)', textAlign: 'center', padding: 40 }}>Cargando...</p>
           ) : appointments.length === 0 ? (
-            <p style={{ color: '#666' }}>No hay citas para esta fecha</p>
+            <p style={{ color: 'var(--text-secondary)', textAlign: 'center', padding: 40 }}>No hay citas para esta fecha</p>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               {appointments.map(appt => (
                 <div key={appt.id} style={{
-                  padding: 16,
-                  border: '1px solid #e5e5e5',
-                  borderRadius: 8,
-                  background: '#fff'
+                  padding: 20,
+                  background: 'var(--surface)',
+                  border: '1px solid var(--border)',
+                  borderRadius: 12
                 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: 12 }}>
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'start',
+                    marginBottom: 16,
+                    flexWrap: 'wrap',
+                    gap: 12
+                  }}>
                     <div>
-                      <div style={{ fontSize: 24, fontWeight: 600, marginBottom: 4 }}>{formatTime(appt.starts_at)}</div>
-                      <div style={{ fontWeight: 500 }}>{appt.services?.name}</div>
-                      <div style={{ color: '#666', fontSize: 14 }}>{appt.services?.duration_min} min</div>
+                      <div style={{ fontSize: 28, fontWeight: 600, color: 'var(--accent)', marginBottom: 4 }}>
+                        {formatTime(appt.starts_at)}
+                      </div>
+                      <div style={{ fontWeight: 500, fontSize: 16 }}>{appt.services?.name}</div>
+                      <div style={{ color: 'var(--text-secondary)', fontSize: 14 }}>{appt.services?.duration_min} min</div>
                     </div>
                     <span style={{
-                      padding: '4px 12px',
-                      borderRadius: 12,
+                      padding: '6px 14px',
+                      borderRadius: 20,
                       background: getStatusColor(appt.status),
                       color: '#fff',
-                      fontSize: 12,
-                      fontWeight: 500
+                      fontSize: 13,
+                      fontWeight: 600
                     }}>
                       {getStatusLabel(appt.status)}
                     </span>
                   </div>
 
-                  <div style={{ marginBottom: 12 }}>
-                    <div style={{ fontWeight: 500 }}>{appt.clients?.name}</div>
-                    <div style={{ color: '#666', fontSize: 14 }}>{appt.clients?.phone}</div>
+                  <div style={{ marginBottom: 16, paddingBottom: 16, borderBottom: '1px solid var(--border)' }}>
+                    <div style={{ fontWeight: 500, marginBottom: 4 }}>{appt.clients?.name}</div>
+                    <div style={{ color: 'var(--text-secondary)', fontSize: 14 }}>{appt.clients?.phone}</div>
                     {appt.status === 'confirmed' && (
                       <button onClick={() => sendReminder(appt)}
-                        style={{ marginTop: 8, padding: '4px 10px', background: '#25D366', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 12 }}>
+                        style={{
+                          marginTop: 10,
+                          padding: '6px 12px',
+                          background: 'var(--whatsapp)',
+                          color: '#fff',
+                          border: 'none',
+                          borderRadius: 6,
+                          cursor: 'pointer',
+                          fontSize: 13,
+                          fontWeight: 500
+                        }}>
                         Enviar recordatorio
                       </button>
                     )}
                   </div>
 
-                  <div style={{ color: '#666', fontSize: 14, marginBottom: 12 }}>
-                    Barbero: <strong>{appt.barbers?.name}</strong>
+                  <div style={{ color: 'var(--text-secondary)', fontSize: 14, marginBottom: 16 }}>
+                    Barbero: <strong style={{ color: 'var(--text)' }}>{appt.barbers?.name}</strong>
                   </div>
 
                   <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'center' }}>
                     {appt.status === 'pending' && (
                       <button onClick={() => updateStatus(appt.id, 'confirmed')}
-                        style={{ padding: '6px 12px', background: '#3b82f6', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 14 }}>
+                        style={{
+                          padding: '8px 16px',
+                          background: 'var(--info)',
+                          color: '#fff',
+                          border: 'none',
+                          borderRadius: 6,
+                          cursor: 'pointer',
+                          fontSize: 14,
+                          fontWeight: 500
+                        }}>
                         Confirmar
                       </button>
                     )}
                     {appt.status === 'confirmed' && (
                       <>
                         <button onClick={() => sendConfirmation(appt)}
-                          style={{ padding: '6px 12px', background: '#25D366', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 14 }}>
+                          style={{
+                            padding: '8px 16px',
+                            background: 'var(--whatsapp)',
+                            color: '#fff',
+                            border: 'none',
+                            borderRadius: 6,
+                            cursor: 'pointer',
+                            fontSize: 14,
+                            fontWeight: 500
+                          }}>
                           WhatsApp
                         </button>
                         <button onClick={() => updateStatus(appt.id, 'completed')}
-                          style={{ padding: '6px 12px', background: '#10b981', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 14 }}>
+                          style={{
+                            padding: '8px 16px',
+                            background: 'var(--success)',
+                            color: '#fff',
+                            border: 'none',
+                            borderRadius: 6,
+                            cursor: 'pointer',
+                            fontSize: 14,
+                            fontWeight: 500
+                          }}>
                           Completar
                         </button>
                       </>
                     )}
                     {appt.status !== 'cancelled' && appt.status !== 'completed' && (
                       <button onClick={() => { sendCancellation(appt); updateStatus(appt.id, 'cancelled') }}
-                        style={{ padding: '6px 12px', background: '#ef4444', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 14 }}>
+                        style={{
+                          padding: '8px 16px',
+                          background: 'var(--error)',
+                          color: '#fff',
+                          border: 'none',
+                          borderRadius: 6,
+                          cursor: 'pointer',
+                          fontSize: 14,
+                          fontWeight: 500
+                        }}>
                         Cancelar
                       </button>
                     )}
@@ -261,27 +352,31 @@ export default function Dashboard() {
 
       {activeTab === 'barbers' && (
         <div>
-          <h2 style={{ marginTop: 0 }}>Barberos</h2>
+          <h2 style={{ marginTop: 0, marginBottom: 24 }}>Barberos</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {barbers.map(barber => (
               <div key={barber.id} style={{
-                padding: 16,
-                border: '1px solid #e5e5e5',
-                borderRadius: 8,
+                padding: 20,
+                background: 'var(--surface)',
+                border: '1px solid var(--border)',
+                borderRadius: 12,
                 display: 'flex',
                 justifyContent: 'space-between',
-                alignItems: 'center'
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                gap: 12
               }}>
                 <div>
-                  <div style={{ fontWeight: 500 }}>{barber.name}</div>
-                  <div style={{ color: '#666', fontSize: 14 }}>{barber.phone}</div>
+                  <div style={{ fontWeight: 600, fontSize: 16, marginBottom: 4 }}>{barber.name}</div>
+                  <div style={{ color: 'var(--text-secondary)', fontSize: 14 }}>{barber.phone}</div>
                 </div>
                 <span style={{
-                  padding: '4px 12px',
-                  borderRadius: 12,
-                  background: barber.is_active ? '#10b981' : '#ef4444',
+                  padding: '6px 14px',
+                  borderRadius: 20,
+                  background: barber.is_active ? 'var(--success)' : 'var(--error)',
                   color: '#fff',
-                  fontSize: 12
+                  fontSize: 13,
+                  fontWeight: 600
                 }}>
                   {barber.is_active ? 'Activo' : 'Inactivo'}
                 </span>
@@ -293,27 +388,33 @@ export default function Dashboard() {
 
       {activeTab === 'services' && (
         <div>
-          <h2 style={{ marginTop: 0 }}>Servicios</h2>
+          <h2 style={{ marginTop: 0, marginBottom: 24 }}>Servicios</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {services.map(service => (
               <div key={service.id} style={{
-                padding: 16,
-                border: '1px solid #e5e5e5',
-                borderRadius: 8,
+                padding: 20,
+                background: 'var(--surface)',
+                border: '1px solid var(--border)',
+                borderRadius: 12,
                 display: 'flex',
                 justifyContent: 'space-between',
-                alignItems: 'center'
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                gap: 12
               }}>
                 <div>
-                  <div style={{ fontWeight: 500 }}>{service.name}</div>
-                  <div style={{ color: '#666', fontSize: 14 }}>{service.duration_min} min · ${service.price.toLocaleString()}</div>
+                  <div style={{ fontWeight: 600, fontSize: 16, marginBottom: 4 }}>{service.name}</div>
+                  <div style={{ color: 'var(--text-secondary)', fontSize: 14 }}>
+                    {service.duration_min} min · <span style={{ color: 'var(--accent)' }}>${service.price.toLocaleString()}</span>
+                  </div>
                 </div>
                 <span style={{
-                  padding: '4px 12px',
-                  borderRadius: 12,
-                  background: service.is_active ? '#10b981' : '#ef4444',
+                  padding: '6px 14px',
+                  borderRadius: 20,
+                  background: service.is_active ? 'var(--success)' : 'var(--error)',
                   color: '#fff',
-                  fontSize: 12
+                  fontSize: 13,
+                  fontWeight: 600
                 }}>
                   {service.is_active ? 'Activo' : 'Inactivo'}
                 </span>
