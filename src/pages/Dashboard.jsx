@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
+import Toast from '../components/Toast'
 
 export default function Dashboard() {
   const { signOut } = useAuth()
@@ -12,6 +13,7 @@ export default function Dashboard() {
   const [services, setServices] = useState([])
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0])
   const [loading, setLoading] = useState(true)
+  const [toasts, setToasts] = useState([])
   
   const [editingBarber, setEditingBarber] = useState(null)
   const [editingService, setEditingService] = useState(null)
@@ -20,6 +22,49 @@ export default function Dashboard() {
   
   const [barberForm, setBarberForm] = useState({ name: '', phone: '', is_active: true })
   const [serviceForm, setServiceForm] = useState({ name: '', duration_min: 30, price: 0, is_active: true })
+
+  const addToast = (toast) => {
+    const id = Date.now()
+    setToasts(prev => [...prev, { ...toast, id }])
+  }
+
+  const removeToast = (id) => {
+    setToasts(prev => prev.filter(t => t.id !== id))
+  }
+
+  useEffect(() => {
+    const channel = supabase
+      .channel('appointments-realtime')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'appointments' }, async (payload) => {
+        const { data } = await supabase
+          .from('appointments')
+          .select('*, barbers(name), services(name), clients(name, phone)')
+          .eq('id', payload.new.id)
+          .single()
+
+        if (data) {
+          const date = new Date(data.starts_at)
+          const time = `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`
+          const dateStr = date.toLocaleDateString('es-CO', { day: 'numeric', month: 'short' })
+
+          addToast({
+            title: 'Nueva cita agendada',
+            message: <><strong>{data.clients?.name}</strong> reservó <strong>{data.services?.name}</strong> con <strong>{data.barbers?.name}</strong></>,
+            detail: `${dateStr} a las ${time} · ${data.clients?.phone}`
+          })
+        }
+
+        loadData()
+      })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'appointments' }, () => {
+        loadData()
+      })
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [])
 
   useEffect(() => {
     const fetch = async () => {
@@ -230,6 +275,8 @@ export default function Dashboard() {
 
   return (
     <div style={{ maxWidth: 1200, margin: '0 auto', padding: '20px' }}>
+      <Toast toasts={toasts} removeToast={removeToast} />
+      
       <div style={{
         display: 'flex',
         justifyContent: 'space-between',
