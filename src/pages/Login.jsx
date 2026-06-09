@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import './Login.css'
 
 export default function Login() {
   const [email, setEmail] = useState('')
@@ -25,113 +26,68 @@ export default function Login() {
   }
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '20px'
-    }}>
-      <div style={{
-        width: '100%',
-        maxWidth: 420,
-        background: 'var(--surface)',
-        padding: '48px 32px',
-        borderRadius: 16,
-        border: '1px solid var(--border)'
-      }}>
-        <div style={{ textAlign: 'center', marginBottom: 40 }}>
-          <h1 style={{ marginBottom: 8, fontSize: '2rem' }}>Acceso Staff</h1>
-          <p style={{ color: 'var(--text-secondary)' }}>Ingresa tus credenciales</p>
+    <div className="login-page">
+      <div className="login-brand">
+        <div className="login-brand-content">
+          <svg className="login-brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <path d="M6 3v18M18 3v18M6 12h12M6 7h12M6 17h12" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          <h1>
+            Barbería<br/>
+            <span className="login-brand-accent">Premium</span>
+          </h1>
+          <div className="login-brand-line"></div>
+          <p>Estilo, precisión y elegancia en cada corte. Tu mejor versión comienza aquí.</p>
         </div>
+      </div>
 
-        <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: 20 }}>
-            <label style={{
-              display: 'block',
-              marginBottom: 8,
-              fontSize: 14,
-              fontWeight: 500,
-              color: 'var(--text-secondary)'
-            }}>
-              Correo electrónico
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              required
-              style={{
-                width: '100%',
-                padding: 14,
-                background: 'var(--secondary)',
-                border: '1px solid var(--border)',
-                borderRadius: 8,
-                color: 'var(--text)',
-                fontSize: 16
-              }}
-            />
+      <div className="login-form-side">
+        <div className="login-form-container">
+          <div className="login-mobile-brand">
+            <svg className="login-mobile-brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <path d="M6 3v18M18 3v18M6 12h12M6 7h12M6 17h12" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            <h1>Barbería <span style={{ color: 'var(--accent)' }}>Premium</span></h1>
+            <div className="login-mobile-brand-line"></div>
           </div>
 
-          <div style={{ marginBottom: 24 }}>
-            <label style={{
-              display: 'block',
-              marginBottom: 8,
-              fontSize: 14,
-              fontWeight: 500,
-              color: 'var(--text-secondary)'
-            }}>
-              Contraseña
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              required
-              style={{
-                width: '100%',
-                padding: 14,
-                background: 'var(--secondary)',
-                border: '1px solid var(--border)',
-                borderRadius: 8,
-                color: 'var(--text)',
-                fontSize: 16
-              }}
-            />
+          <div className="login-form-header">
+            <h2>Acceso Staff</h2>
+            <p>Ingresa tus credenciales para continuar</p>
           </div>
 
-          {error && (
-            <div style={{
-              padding: 12,
-              marginBottom: 20,
-              background: 'rgba(239, 68, 68, 0.1)',
-              border: '1px solid var(--error)',
-              borderRadius: 8,
-              color: 'var(--error)',
-              fontSize: 14
-            }}>
-              {error}
+          <form onSubmit={handleSubmit}>
+            <div className="login-field">
+              <label>Correo electrónico</label>
+              <input
+                type="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                placeholder="tu@correo.com"
+                required
+              />
             </div>
-          )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            style={{
-              width: '100%',
-              padding: 16,
-              background: 'var(--accent)',
-              color: 'var(--primary)',
-              border: 'none',
-              borderRadius: 8,
-              cursor: loading ? 'not-allowed' : 'pointer',
-              fontSize: 16,
-              fontWeight: 600,
-              opacity: loading ? 0.6 : 1
-            }}>
-            {loading ? 'Entrando...' : 'Entrar'}
-          </button>
-        </form>
+            <div className="login-field">
+              <label>Contraseña</label>
+              <input
+                type="password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+              />
+            </div>
+
+            {error && <div className="login-error">{error}</div>}
+
+            <button type="submit" disabled={loading} className="login-submit">
+              {loading ? 'Entrando...' : 'Entrar'}
+            </button>
+          </form>
+
+          <a href="/" className="login-back-link">← Volver a reservar cita</a>
+        </div>
       </div>
     </div>
   )
