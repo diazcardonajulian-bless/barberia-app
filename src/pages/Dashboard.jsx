@@ -33,14 +33,20 @@ export default function Dashboard() {
   }
 
   useEffect(() => {
+    console.log('Iniciando suscripción Realtime...')
+    
     const channel = supabase
       .channel('appointments-realtime')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'appointments' }, async (payload) => {
-        const { data } = await supabase
+        console.log('Evento INSERT recibido:', payload)
+        
+        const { data, error } = await supabase
           .from('appointments')
           .select('*, barbers(name), services(name), clients(name, phone)')
           .eq('id', payload.new.id)
           .single()
+
+        console.log('Datos de la cita:', { data, error })
 
         if (data) {
           const date = new Date(data.starts_at)
@@ -56,12 +62,16 @@ export default function Dashboard() {
 
         loadData()
       })
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'appointments' }, () => {
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'appointments' }, (payload) => {
+        console.log('Evento UPDATE recibido:', payload)
         loadData()
       })
-      .subscribe()
+      .subscribe((status) => {
+        console.log('Estado de suscripción:', status)
+      })
 
     return () => {
+      console.log('Cerrando suscripción Realtime')
       supabase.removeChannel(channel)
     }
   }, [])
